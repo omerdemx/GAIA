@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroHealth AI | Geleceğin Tıbbı</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-dark': '#050a14',
+                        'brand-accent': '#00f2ff', // Cyan - AI
+                        'brand-bio': '#39ff14',   // Neon Green - Biology
+                        'brand-purple': '#b026ff', // Future
+                        'glass': 'rgba(255, 255, 255, 0.05)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Orbitron', 'monospace'], // Futuristik başlıklar için
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #050a14;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050a14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #00f2ff;
+            border-radius: 4px;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(10, 20, 35, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 242, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            border-color: #00f2ff;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+        }
+
+        /* Text Glow */
+        .text-glow {
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+        }
+        
+        .bio-glow {
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+        }
+
+        /* Canvas Positioning */
+        #neural-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        /* Gradient Overlay for Canvas readability */
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, #050a14 90%);
+            z-index: -1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="antialiased font-sans selection:bg-brand-accent selection:text-brand-dark">
+
+    <!-- Interactive Background -->
+    <canvas id="neural-canvas"></canvas>
+    <div class="bg-overlay"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-panel border-b-0 border-b-brand-accent/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-dna text-3xl text-brand-accent animate-pulse-slow"></i>
+                    <span class="font-mono text-2xl font-bold tracking-widest text-white">
+                        NEURO<span class="text-brand-accent">HEALTH</span>
+                    </span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="#home" class="hover:text-brand-accent px-3 py-2 rounded-md text-sm font-medium transition-colors">Ana Sayfa</a>
+                        <a href="#about" class="hover:text-brand-accent px-3 py-2 rounded-md text-sm font-medium transition-colors">Hakkımızda</a>
+                        <a href="#domains" class="hover:text-brand-accent px-3 py-2 rounded-md text-sm font-medium transition-colors">Odak Alanları</a>
+                        <a href="#events" class="hover:text-brand-accent px-3 py-2 rounded-md text-sm font-medium transition-colors">Etkinlikler</a>
+                        <a href="#join" class="bg-brand-accent/10 border border-brand-accent hover:bg-brand-accent hover:text-brand-dark px-4 py-2 rounded-full text-sm font-bold transition-all shadow-[0_0_15px_rgba(0,242,255,0.3)]">
+                            Kulübe Katıl
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-gray-300 hover:text-white focus:outline-none">
+                        <i class="fa-solid fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu Panel -->
+        <div id="mobile-menu" class="hidden md:hidden glass-panel border-t border-brand-accent/20">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#home" class="block hover:text-brand-accent px-3 py-2 rounded-md text-base font-medium">Ana Sayfa</a>
+                <a href="#about" class="block hover:text-brand-accent px-3 py-2 rounded-md text-base font-medium">Hakkımızda</a>
+                <a href="#domains" class="block hover:text-brand-accent px-3 py-2 rounded-md text-base font-medium">Odak Alanları</a>
+                <a href="#join" class="block text-brand-accent font-bold px-3 py-2">Kulübe Katıl</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="relative min-h-screen flex items-center justify-center pt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center z-10">
+            <div class="inline-block mb-4 px-4 py-1 rounded-full border border-brand-bio/30 bg-brand-bio/10 backdrop-blur-sm animate-float">
+                <span class="text-brand-bio text-sm font-mono tracking-wider"><i class="fa-solid fa-circle-nodes mr-2"></i>YZ ve Yaşam Bilimlerinin Kesişimi</span>
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-mono font-black mb-6 leading-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-brand-accent to-brand-purple pb-2">
+                SAĞLIĞIN GELECEĞİNİ<br>KODLUYORUZ
+            </h1>
+            
+            <p class="mt-4 max-w-2xl text-xl text-gray-400 font-light mb-10">
+                Veri bilimi ve biyolojiyi birleştirerek teşhis, tedavi ve insan ömrünü uzatma konularında devrim yaratmayı hedefleyen öğrenci topluluğu.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4">
+                <a href="#domains" class="group relative px-8 py-4 bg-brand-accent text-brand-dark font-bold rounded-lg overflow-hidden transition-all hover:scale-105">
+                    <span class="relative z-10">Projeleri Keşfet</span>
+                    <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                </a>
+                <a href="#join" class="px-8 py-4 border border-brand-purple text-brand-purple font-bold rounded-lg hover:bg-brand-purple/10 transition-all hover:shadow-[0_0_20px_rgba(176,38,255,0.4)]">
+                    Ekibe Katıl
+                </a>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 w-full max-w-4xl border-t border-white/10 pt-8">
+                <div>
+                    <h3 class="text-3xl font-mono font-bold text-white">50+</h3>
+                    <p class="text-gray-500 text-sm">Aktif Üye</p>
+                </div>
+                <div>
+                    <h3 class="text-3xl font-mono font-bold text-brand-accent">12</h3>
+                    <p class="text-gray-500 text-sm">Tamamlanan Proje</p>
+                </div>
+                <div>
+                    <h3 class="text-3xl font-mono font-bold text-brand-bio">5</h3>
+                    <p class="text-gray-500 text-sm">Hackathon Ödülü</p>
+                </div>
+                <div>
+                    <h3 class="text-3xl font-mono font-bold text-brand-purple">∞</h3>
+                    <p class="text-gray-500 text-sm">İnovasyon</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="relative group">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-brand-accent to-brand-purple rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+                    <div class="relative glass-panel p-8 rounded-lg aspect-square flex items-center justify-center overflow-hidden">
+                        <!-- Holographic Element Simulation -->
+                        <i class="fa-solid fa-brain text-9xl text-white/10 absolute animate-pulse-slow"></i>
+                        <div class="z-10 text-center">
+                            <i class="fa-solid fa-microscope text-6xl text-brand-accent mb-4"></i>
+                            <h3 class="text-2xl font-mono font-bold text-white">Misyonumuz</h3>
+                            <p class="mt-4 text-gray-400">Tıp fakültesi ve mühendislik öğrencilerini bir araya getirerek disiplinler arası inovasyon kültürü oluşturmak.</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-mono font-bold mb-6 text-glow">Neden Yapay Zeka & Sağlık?</h2>
+                    <p class="text-lg text-gray-300 mb-6 leading-relaxed">
+                        Geleneksel tıp, veri odaklı hassas tıbba dönüşüyor. Yapay zeka algoritmaları, insan gözünün kaçırabileceği desenleri radyolojik görüntülerde tespit edebiliyor, yeni ilaç moleküllerini simüle edebiliyor ve genetik hastalıkları önceden tahmin edebiliyor.
+                    </p>
+                    <ul class="space-y-4">
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-check-circle text-brand-bio"></i>
+                            <span>Kişiselleştirilmiş Tıp (Precision Medicine)</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-check-circle text-brand-bio"></i>
+                            <span>Biyoinformatik Veri Analizi</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-check-circle text-brand-bio"></i>
+                            <span>Medikal Robotik ve Otomasyon</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Domains / Features Section -->
+    <section id="domains" class="py-24 bg-black/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-mono font-bold mb-4"><span class="text-brand-accent">Araştırma</span> Alanları</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Kulüp bünyesinde aktif olarak proje geliştirdiğimiz ana çalışma grupları.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="glass-card p-8 rounded-2xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
+                        <i class="fa-solid fa-eye text-6xl text-brand-accent"></i>
+                    </div>
+                    <div class="w-12 h-12 bg-brand-accent/20 rounded-lg flex items-center justify-center mb-6 text-brand-accent">
+                        <i class="fa-solid fa-image text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-mono mb-3 text-white">Medikal Görüntüleme</h3>
+                    <p class="text-gray-400 text-sm mb-4">MR ve BT taramalarında tümör tespiti için Derin Öğrenme (Deep Learning) modelleri geliştiriyoruz.</p>
+                    <a href="#" class="text-brand-accent text-sm font-bold flex items-center gap-2 hover:gap-4 transition-all">
+                        Projeleri Gör <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="glass-card p-8 rounded-2xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
+                        <i class="fa-solid fa-dna text-6xl text-brand-bio"></i>
+                    </div>
+                    <div class="w-12 h-12 bg-brand-bio/20 rounded-lg flex items-center justify-center mb-6 text-brand-bio">
+                        <i class="fa-solid fa-flask text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-mono mb-3 text-white">Genomik & AI</h3>
+                    <p class="text-gray-400 text-sm mb-4">DNA dizilimlerini analiz ederek genetik hastalık risklerini tahmin eden algoritmalar.</p>
+                    <a href="#" class="text-brand-bio text-sm font-bold flex items-center gap-2 hover:gap-4 transition-all">
+                        Projeleri Gör <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="glass-card p-8 rounded-2xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
+                        <i class="fa-solid fa-robot text-6xl text-brand-purple"></i>
+                    </div>
+                    <div class="w-12 h-12 bg-brand-purple/20 rounded-lg flex items-center justify-center mb-6 text-brand-purple">
+                        <i class="fa-solid fa-hand-holding-medical text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-mono mb-3 text-white">NLP & Sağlık Asistanları</h3>
+                    <p class="text-gray-400 text-sm mb-4">Doktor notlarını analiz eden ve hastalara ön tanı desteği sunan Doğal Dil İşleme modelleri.</p>
+                    <a href="#" class="text-brand-purple text-sm font-bold flex items-center gap-2 hover:gap-4 transition-all">
+                        Projeleri Gör <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Join Us Section -->
+    <section id="join" class="py-24 relative overflow-hidden">
+        <div class="absolute inset-0 bg-brand-accent/5 skew-y-3 transform origin-bottom-right z-0"></div>
+        <div class="max-w-4xl mx-auto px-4 relative z-10 text-center">
+            <h2 class="text-4xl font-mono font-bold mb-8">Geleceği Şekillendirmeye Hazır mısın?</h2>
+            <p class="text-gray-300 mb-10">
+                Kodlama bilmene gerek yok. Meraklı olman yeterli. Mühendisler, doktor adayları, biyologlar ve tasarımcılar... Hepinizi bekliyoruz.
+            </p>
+            
+            <form class="glass-panel p-8 rounded-2xl max-w-lg mx-auto text-left">
+                <div class="mb-4">
+                    <label class="block text-gray-400 text-sm font-bold mb-2" for="email">E-posta Adresin</label>
+                    <input class="w-full px-3 py-3 bg-black/50 border border-gray-700 rounded text-white focus:outline-none focus:border-brand-accent transition-colors" id="email" type="email" placeholder="ornek@uni.edu.tr">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-400 text-sm font-bold mb-2" for="interest">İlgi Alanın</label>
+                    <select class="w-full px-3 py-3 bg-black/50 border border-gray-700 rounded text-white focus:outline-none focus:border-brand-accent transition-colors" id="interest">
+                        <option>Veri Bilimi</option>
+                        <option>Tıp / Biyoloji</option>
+                        <option>Tasarım / UI</option>
+                        <option>Sadece merak ediyorum</option>
+                    </select>
+                </div>
+                <button type="button" onclick="alert('Başvurunuz alındı! Yakında size dönüş yapacağız.')" class="w-full bg-gradient-to-r from-brand-accent to-blue-600 text-white font-bold py-3 rounded hover:opacity-90 transition-opacity">
+                    Başvuruyu Gönder
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/10 bg-black pt-12 pb-6">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-dna text-brand-accent"></i>
+                <span class="font-mono font-bold text-lg">NEUROHEALTH AI</span>
+            </div>
+            
+            <div class="flex space-x-6">
+                <a href="#" class="text-gray-400 hover:text-brand-accent transition-colors"><i class="fa-brands fa-github text-xl"></i></a>
+                <a href="#" class="text-gray-400 hover:text-brand-accent transition-colors"><i class="fa-brands fa-discord text-xl"></i></a>
+                <a href="#" class="text-gray-400 hover:text-brand-accent transition-colors"><i class="fa-brands fa-twitter text-xl"></i></a>
+                <a href="#" class="text-gray-400 hover:text-brand-accent transition-colors"><i class="fa-brands fa-linkedin text-xl"></i></a>
+            </div>
+        </div>
+        <div class="text-center mt-8 text-gray-600 text-xs font-mono">
+            &copy; 2024 NeuroHealth AI Club. Tüm hakları saklıdır.
+        </div>
+    </footer>
+
+    <!-- JavaScript for Interactions and Canvas Animation -->
+    <script>
+        // Mobile Menu Toggle
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        // Neural Network Canvas Animation
+        const canvas = document.getElementById('neural-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        let particles = [];
+        
+        // Colors: Cyan for Tech, Green for Bio
+        const colors = ['#00f2ff', '#39ff14', '#ffffff'];
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 1; // Speed X
+                this.vy = (Math.random() - 0.5) * 1; // Speed Y
+                this.size = Math.random() * 2 + 1;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Bounce off edges
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            // Screen size sensitive particle count
+            const particleCount = Math.floor(width * height / 15000); 
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Update and draw particles
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+
+                // Draw connections (Neural/Molecular bonds)
+                for (let j = i; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(0, 242, 255, ${1 - distance / 100})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        // Initialize
+        window.addEventListener('resize', () => {
+            resize();
+            initParticles();
+        });
+        
+        resize();
+        initParticles();
+        animate();
+
+    </script>
+</body>
+</html>
